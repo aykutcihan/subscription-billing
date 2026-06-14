@@ -7,9 +7,10 @@
 target/
 .gradle/
 build/
-!gradle/wrapper/gradle-wrapper.jar
 *.jar
 *.war
+!gradle/wrapper/gradle-wrapper.jar
+!**/.mvn/wrapper/maven-wrapper.jar
 !**/src/**/*.jar
 HELP.md
 

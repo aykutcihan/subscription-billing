@@ -1,0 +1,25 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:auth_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    locations: classpath:db/migration
+
+cadence:
+  auth:
+    jwt:
+      secret: ${JWT_SECRET:cadence-auth-service-dev-jwt-secret-please-override-in-production}
+      expiration-ms: ${JWT_EXPIRATION_MS:86400000}
