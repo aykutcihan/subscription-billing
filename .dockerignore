@@ -1,0 +1,38 @@
+# Version control
+.git
+.gitignore
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Docs
+docs/
+*.md
+
+# Java / Spring
+**/target/
+**/.gradle/
+**/build/
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/.venv/
+**/venv/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+
+# Node / Frontend
+**/node_modules/
+**/dist/
+**/.turbo/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
