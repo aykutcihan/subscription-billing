@@ -1,224 +1,224 @@
 # Cadence — Sprint Backlog (User Stories)
 
-ROADMAP'in fazları burada **sprint + story** yapısına çevrildi. Her sprint çalışan bir artış üretir.
+The phases from the ROADMAP are translated here into a **sprint + story** structure. Each sprint produces a working increment.
 
-- **US** = User Story (kullanıcı-yüzlü)
-- **TS** = Technical Story / enabler (altyapı, dağıtık plumbing — kullanıcıya görünmez ama gerekli)
+- **US** = User Story (user-facing)
+- **TS** = Technical Story / enabler (infrastructure, distributed plumbing — invisible to the user but necessary)
 
-## Claude Code ile nasıl kullanılır
+## How to use with Claude Code
 
-- Story'leri **sırayla** ver. Bir story'i bitirip acceptance criteria'sını geçmeden sonrakine geçme.
-- Claude Code'a verirken başına ekle: *"Sadece bu story'i uygula, acceptance criteria'yı karşıla, fazlasını ekleme (YAGNI)."*
-- Her story için testini de yaz.
+- Give stories **in order**. Don't move on to the next one until the current story's acceptance criteria are met.
+- When handing a story to Claude Code, prefix it with: *"Implement only this story, satisfy the acceptance criteria, don't add anything extra (YAGNI)."*
+- Write tests for each story too.
 
 ---
 
-## Genel bakış
+## Overview
 
-| Sprint | Hedef | Story'ler |
+| Sprint | Goal | Stories |
 |---|---|---|
-| 0 | Temel & altyapı | TS-0.1 |
-| 1 | Kimlik & gateway | US-1.1, US-1.2, TS-1.3 |
-| 2 | Abonelik & ilk event | US-2.1, US-2.2, TS-2.3 |
-| 3 | Bildirim & güvenilirlik | US-3.1, TS-3.2 |
-| 4 | Tekrarlayan faturalandırma | US-4.1, TS-4.2 |
-| 5 | Ödeme & idempotency/outbox | US-5.1, TS-5.2, TS-5.3 |
-| 6 | Başarısız ödeme | US-6.1, TS-6.2 |
-| 7 | Fatura belgesi | US-7.1, TS-7.2 |
+| 0 | Foundation & infrastructure | TS-0.1 |
+| 1 | Identity & gateway | US-1.1, US-1.2, TS-1.3 |
+| 2 | Subscription & first event | US-2.1, US-2.2, TS-2.3 |
+| 3 | Notification & reliability | US-3.1, TS-3.2 |
+| 4 | Recurring billing | US-4.1, TS-4.2 |
+| 5 | Payment & idempotency/outbox | US-5.1, TS-5.2, TS-5.3 |
+| 6 | Failed payment | US-6.1, TS-6.2 |
+| 7 | Invoice document | US-7.1, TS-7.2 |
 | 8 | Frontend & dashboard | US-8.1, US-8.2 |
-| 9 | Observability & sağlamlaştırma | TS-9.1, TS-9.2, TS-9.3 |
+| 9 | Observability & hardening | TS-9.1, TS-9.2, TS-9.3 |
 | 10 | Template & deploy | TS-10.1, TS-10.2 |
 
 ---
 
-## Sprint 0 — Temel & altyapı *(Faz 0)*
+## Sprint 0 — Foundation & infrastructure *(Phase 0)*
 
-### TS-0.1 — Repo ve altyapı iskeleti
-**Tip:** Technical Story
-**Açıklama:** Monorepo, docker-compose (Postgres + RabbitMQ + Redis), kök config'ler, docs iskeleti ve CI kurulur.
+### TS-0.1 — Repo and infrastructure skeleton
+**Type:** Technical Story
+**Description:** Set up the monorepo, docker-compose (Postgres + RabbitMQ + Redis), root configs, docs skeleton, and CI.
 **Acceptance criteria:**
-- [ ] Monorepo klasör yapısı + `docs/` iskeleti var
-- [ ] `docker compose up` ile Postgres + RabbitMQ + Redis ayağa kalkıyor, RabbitMQ arayüzü (15672) açılıyor
-- [ ] `.gitignore`, `.env.example`, `.dockerignore` yerinde
-- [ ] `ci.yml` çalışıyor (pipeline yeşil)
-- [ ] `ADR-001-monorepo` yazıldı
-**Not:** Hiçbir servis kodu yazma; sadece iskelet + altyapı.
+- [ ] Monorepo folder structure + `docs/` skeleton exist
+- [ ] `docker compose up` brings up Postgres + RabbitMQ + Redis; the RabbitMQ UI (15672) opens
+- [ ] `.gitignore`, `.env.example`, `.dockerignore` are in place
+- [ ] `ci.yml` runs (pipeline green)
+- [ ] `ADR-001-monorepo` is written
+**Note:** Don't write any service code; skeleton + infrastructure only.
 
 ---
 
-## Sprint 1 — Kimlik & gateway *(Faz 1–2)*
+## Sprint 1 — Identity & gateway *(Phase 1–2)*
 
-### US-1.1 — Üye kaydı
-**Bir üye olarak**, bir hesap oluşturabilmeliyim, **böylece** platformu kullanabileyim.
+### US-1.1 — Member registration
+**As a member**, I want to be able to create an account, **so that** I can use the platform.
 **Acceptance criteria:**
-- [ ] `POST /auth/register` benzersiz username/email ile kullanıcı oluşturur
-- [ ] Şifre hash'lenerek saklanır
-- [ ] Aynı email/username ikinci kez reddedilir (anlamlı hata)
-**Not:** Auth servisi (Spring · SMS deseni). *(Bu büyük ölçüde tamam.)*
+- [ ] `POST /auth/register` creates a user with a unique username/email
+- [ ] The password is stored hashed
+- [ ] A duplicate email/username is rejected (meaningful error)
+**Note:** Auth service (Spring · SMS pattern). *(Largely done.)*
 
-### US-1.2 — Giriş ve token
-**Bir üye olarak**, giriş yapıp token alabilmeliyim, **böylece** kimliğimi kanıtlayan istekler atabileyim.
+### US-1.2 — Login and token
+**As a member**, I want to log in and get a token, **so that** I can make requests that prove my identity.
 **Acceptance criteria:**
-- [ ] `POST /auth/login` doğru bilgiyle JWT döner
-- [ ] Yanlış bilgi reddedilir
-**Not:** Auth servisi. *(Tamam.)*
+- [ ] `POST /auth/login` returns a JWT for valid credentials
+- [ ] Invalid credentials are rejected
+**Note:** Auth service. *(Done.)*
 
 ### TS-1.3 — API Gateway
-**Tip:** Technical Story
-**Açıklama:** Tüm trafik gateway üzerinden geçer; JWT kapıda doğrulanır.
+**Type:** Technical Story
+**Description:** All traffic passes through the gateway; the JWT is validated at the gate.
 **Acceptance criteria:**
-- [ ] `/auth/**` istekleri gateway üzerinden auth servisine yönlenir
-- [ ] Geçersiz/eksik token gateway'de reddedilir
-- [ ] Gateway'de iş mantığı yok (sadece routing + auth)
-**Not:** Spring Cloud Gateway. *(Faz 2 — gateway/ şu an boş.)*
+- [ ] `/auth/**` requests are routed to the auth service via the gateway
+- [ ] Invalid/missing tokens are rejected at the gateway
+- [ ] The gateway has no business logic (routing + auth only)
+**Note:** Spring Cloud Gateway. *(Phase 2 — gateway/ is currently empty.)*
 
 ---
 
-## Sprint 2 — Abonelik & ilk event *(Faz 3–4)*
+## Sprint 2 — Subscription & first event *(Phase 3–4)*
 
-### US-2.1 — Plana abone olma
-**Bir üye olarak**, bir plana abone olabilmeliyim, **böylece** aktif üye olayım.
+### US-2.1 — Subscribe to a plan
+**As a member**, I want to be able to subscribe to a plan, **so that** I become an active member.
 **Acceptance criteria:**
-- [ ] Gateway + token ile abonelik oluşturulur, durumu `active`
-- [ ] Abonelik sadece `userId` referansı tutar (User tablosu yok)
+- [ ] A subscription is created via the gateway + token, with status `active`
+- [ ] The subscription only holds a `userId` reference (no User table)
 
-### US-2.2 — Aboneliği görüntüleme/iptal
-**Bir üye olarak**, aboneliğimi görebilmeli ve iptal edebilmeliyim.
+### US-2.2 — View/cancel subscription
+**As a member**, I want to be able to view and cancel my subscription.
 **Acceptance criteria:**
-- [ ] Üye kendi aboneliğini listeler
-- [ ] İptal durumu `cancelled` yapar (state machine geçişi)
+- [ ] A member lists their own subscription
+- [ ] Cancelling sets the status to `cancelled` (state machine transition)
 
-### TS-2.3 — RabbitMQ + Audit servisi (ilk event)
-**Tip:** Technical Story
-**Açıklama:** Subscription `SubscriptionCreated` yayınlar; Audit servisi dinleyip loglar.
+### TS-2.3 — RabbitMQ + Audit service (first event)
+**Type:** Technical Story
+**Description:** Subscription publishes `SubscriptionCreated`; the Audit service consumes it and logs it.
 **Acceptance criteria:**
-- [ ] Abonelik oluşunca event yayınlanıyor
-- [ ] Audit servisi (FastAPI · StepUp deseni) event'i yakalayıp `audit_log`'a yazıyor
-- [ ] RabbitMQ arayüzünde mesaj akışı görülüyor
-**Not:** İlk asenkron iletişim. Outbox/idempotency henüz YOK.
+- [ ] An event is published when a subscription is created
+- [ ] The Audit service (FastAPI · StepUp pattern) consumes the event and writes it to `audit_log`
+- [ ] The message flow is visible in the RabbitMQ UI
+**Note:** First asynchronous communication. Outbox/idempotency NOT yet in place.
 
 ---
 
-## Sprint 3 — Bildirim & güvenilirlik *(Faz 5)*
+## Sprint 3 — Notification & reliability *(Phase 5)*
 
-### US-3.1 — Abonelik onay maili
-**Bir üye olarak**, abone olunca onay maili almalıyım.
+### US-3.1 — Subscription confirmation email
+**As a member**, I should receive a confirmation email when I subscribe.
 **Acceptance criteria:**
-- [ ] `SubscriptionCreated` → Notification servisi mail atar (başta mock/log)
+- [ ] `SubscriptionCreated` → Notification service sends an email (mock/log initially)
 
 ### TS-3.2 — Idempotent consumer
-**Tip:** Technical Story
+**Type:** Technical Story
 **Acceptance criteria:**
-- [ ] Aynı event iki kez teslim edilse bile mail bir kez gider
-- [ ] İşlenen `event_id`'ler saklanır
+- [ ] Even if the same event is delivered twice, the email is sent only once
+- [ ] Processed `event_id`s are stored
 
 ---
 
-## Sprint 4 — Tekrarlayan faturalandırma *(Faz 6)*
+## Sprint 4 — Recurring billing *(Phase 6)*
 
-### US-4.1 — Otomatik dönemsel fatura
-**İşletme olarak**, üyeler her dönem otomatik faturalanmalı, **böylece** elle uğraşmayayım.
+### US-4.1 — Automatic periodic invoice
+**As a business**, members should be billed automatically each period, **so that** I don't have to do it by hand.
 **Acceptance criteria:**
-- [ ] Zamanlanmış job aktif üyeler için fatura oluşturur
-- [ ] Fatura oluşunca `InvoiceIssued` yayınlanır
+- [ ] A scheduled job creates invoices for active members
+- [ ] `InvoiceIssued` is published when an invoice is created
 
 ### TS-4.2 — Quartz scheduler
-**Tip:** Technical Story
+**Type:** Technical Story
 **Acceptance criteria:**
-- [ ] Billing servisinde Quartz job dönemsel çalışır (manuel tetikle test edilebilir)
-**Not:** Çok-instance koordinasyonu (clustering) Sprint 9'a bırakıldı.
+- [ ] A Quartz job in the billing service runs periodically (can be triggered manually for testing)
+**Note:** Multi-instance coordination (clustering) is deferred to Sprint 9.
 
 ---
 
-## Sprint 5 — Ödeme & idempotency/outbox *(Faz 7 — imza zorluk)*
+## Sprint 5 — Payment & idempotency/outbox *(Phase 7 — signature challenge)*
 
-### US-5.1 — Otomatik tahsilat
-**Bir üye olarak**, faturam otomatik tahsil edilmeli.
+### US-5.1 — Automatic collection
+**As a member**, my invoice should be collected automatically.
 **Acceptance criteria:**
-- [ ] `InvoiceIssued` → Payment servisi ödemeyi işler (başta mock sağlayıcı)
+- [ ] `InvoiceIssued` → Payment service processes the payment (mock provider initially)
 
 ### TS-5.2 — Idempotency key
-**Tip:** Technical Story
+**Type:** Technical Story
 **Acceptance criteria:**
-- [ ] Her ödeme isteği benzersiz key taşır; PostgreSQL unique constraint ile saklanır
-- [ ] Aynı key ile ikinci istek **yeni tahsilat yapmaz**, önceki sonucu döner
+- [ ] Every payment request carries a unique key, stored via a PostgreSQL unique constraint
+- [ ] A second request with the same key **does not create a new charge**, and returns the previous result
 
 ### TS-5.3 — Outbox pattern
-**Tip:** Technical Story
+**Type:** Technical Story
 **Acceptance criteria:**
-- [ ] "Ödendi" event'i ödeme ile **aynı transaction'da** outbox tablosuna yazılır
-- [ ] Relay outbox'ı okuyup RabbitMQ'ya yayınlar; event kaybolmaz
-**Not:** Debezium/CDC yok; basit polling relay.
+- [ ] The "Paid" event is written to the outbox table in the **same transaction** as the payment
+- [ ] A relay reads the outbox and publishes to RabbitMQ; no event is lost
+**Note:** No Debezium/CDC; a simple polling relay.
 
 ---
 
-## Sprint 6 — Başarısız ödeme *(Faz 8)*
+## Sprint 6 — Failed payment *(Phase 8)*
 
-### US-6.1 — Başarısız ödeme yönetimi
-**İşletme olarak**, başarısız ödemeler tekrar denenmeli; ısrarla başarısız olan üyelik `past_due → cancelled` olmalı.
+### US-6.1 — Failed payment handling
+**As a business**, failed payments should be retried; a membership that keeps failing should move `past_due → cancelled`.
 **Acceptance criteria:**
-- [ ] Başarısız ödeme exponential backoff ile tekrar denenir
-- [ ] Belli denemeden sonra üyelik durumu güncellenir
+- [ ] A failed payment is retried with exponential backoff
+- [ ] After a certain number of attempts, the membership status is updated
 
 ### TS-6.2 — Dead-letter queue
-**Tip:** Technical Story
+**Type:** Technical Story
 **Acceptance criteria:**
-- [ ] Belirli denemeden sonra mesaj DLQ'ya düşer
+- [ ] After a certain number of attempts, the message is moved to the DLQ
 
 ---
 
-## Sprint 7 — Fatura belgesi *(Faz 9)*
+## Sprint 7 — Invoice document *(Phase 9)*
 
-### US-7.1 — Fatura PDF indirme
-**Bir üye olarak**, faturamı PDF olarak indirebilmeliyim.
+### US-7.1 — Download invoice PDF
+**As a member**, I want to be able to download my invoice as a PDF.
 **Acceptance criteria:**
-- [ ] `InvoiceIssued` → Document servisi PDF üretir
-- [ ] Üye faturayı gateway üzerinden indirir
+- [ ] `InvoiceIssued` → Document service generates a PDF
+- [ ] The member downloads the invoice via the gateway
 
-### TS-7.2 — Document servisi & dosya saklama
-**Tip:** Technical Story
+### TS-7.2 — Document service & file storage
+**Type:** Technical Story
 **Acceptance criteria:**
-- [ ] PDF saklanır (başta local; sonra GCP signed URL)
+- [ ] PDFs are stored (locally at first; later via a GCP signed URL)
 
 ---
 
-## Sprint 8 — Frontend & dashboard *(Faz 10)*
+## Sprint 8 — Frontend & dashboard *(Phase 10)*
 
-### US-8.1 — Web üzerinden abonelik yönetimi
-**Bir üye olarak**, aboneliğimi web arayüzünden yönetebilmeliyim.
+### US-8.1 — Manage subscription from the web
+**As a member**, I want to be able to manage my subscription from the web UI.
 **Acceptance criteria:**
-- [ ] Login → abone ol → aboneliği gör/iptal et akışı UI'dan çalışır
-**Not:** Frontend = StepUp React kabuğu (auth, i18n, API client).
+- [ ] The login → subscribe → view/cancel subscription flow works from the UI
+**Note:** Frontend = StepUp React shell (auth, i18n, API client).
 
 ### US-8.2 — Admin dashboard
-**Bir admin olarak**, gelir / aktif üye / başarısız ödeme / yaklaşan yenileme metriklerini tek ekranda görmeliyim.
+**As an admin**, I want to see revenue / active members / failed payments / upcoming renewals metrics on a single screen.
 **Acceptance criteria:**
-- [ ] Dashboard verisi gateway üzerinden birkaç servisten toplanıp gösterilir
-**Not:** BFF/CQRS yok; basit çoklu çağrı.
+- [ ] Dashboard data is aggregated from several services via the gateway and displayed
+**Note:** No BFF/CQRS; simple multiple calls.
 
 ---
 
-## Sprint 9 — Observability & sağlamlaştırma *(Faz 11–12)*
+## Sprint 9 — Observability & hardening *(Phase 11–12)*
 
 ### TS-9.1 — Distributed tracing
-**Acceptance criteria:** Bir istek gateway'den başlayıp servisler arası Jaeger'da izlenebilir (OpenTelemetry).
+**Acceptance criteria:** A request starting at the gateway can be traced across services in Jaeger (OpenTelemetry).
 
-### TS-9.2 — Test kapsamı
-**Acceptance criteria:** Her serviste unit + integration (Testcontainers); frontend e2e (Playwright); servisler arası contract testing (Pact).
+### TS-9.2 — Test coverage
+**Acceptance criteria:** Each service has unit + integration tests (Testcontainers); frontend e2e (Playwright); cross-service contract testing (Pact).
 
-### TS-9.3 — Dağıtık zamanlama güvenliği
-**Acceptance criteria:** Çok-instance'ta Quartz job tek kez çalışır (ShedLock / clustering).
+### TS-9.3 — Distributed scheduling safety
+**Acceptance criteria:** A Quartz job runs exactly once across multiple instances (ShedLock / clustering).
 
 ---
 
-## Sprint 10 — Template & deploy *(Faz 13–14)*
+## Sprint 10 — Template & deploy *(Phase 13–14)*
 
-### TS-10.1 — Template çıkarımı
-**Acceptance criteria:** Gateway + bir örnek Spring + bir örnek FastAPI servisi + compose + .github + docs iskeleti ayrı bir "Template repository"ye çıkarılır.
+### TS-10.1 — Template extraction
+**Acceptance criteria:** The gateway + one sample Spring service + one sample FastAPI service + compose + .github + docs skeleton are extracted into a separate "Template repository".
 
 ### TS-10.2 — GCP deploy
-**Acceptance criteria:** Servisler Cloud Run'da, frontend Firebase'de; Cloud SQL + Cloud Scheduler + managed/değerlendirilmiş broker; GitHub Actions ile CI/CD.
+**Acceptance criteria:** Services run on Cloud Run, the frontend on Firebase; Cloud SQL + Cloud Scheduler + a managed/evaluated broker; CI/CD via GitHub Actions.
 
 ---
 
-**Altın kural:** Her story acceptance criteria'sını geçmeden kapanmaz. Her sprint çalışan bir artış bırakır.
+**Golden rule:** No story is closed until its acceptance criteria are met. Every sprint leaves behind a working increment.

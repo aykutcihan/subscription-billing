@@ -7,8 +7,8 @@ on:
     branches: [main, develop]
 
 jobs:
-  # Spring servisleri (SMS deseni). Şu an sadece auth var.
-  # Servis ekledikçe matrix'i büyüt: [auth, subscription, billing, payment, gateway]
+  # Spring services (SMS pattern). Currently only auth exists.
+  # Grow the matrix as services are added: [auth, subscription, billing, payment, gateway]
   spring-services:
     runs-on: ubuntu-latest
     strategy:
@@ -28,12 +28,12 @@ jobs:
       - name: Build & test ${{ matrix.service }}
         working-directory: services/${{ matrix.service }}
         run: ./mvnw -B verify
-        # integration testleri Testcontainers ile gerçek Postgres/RabbitMQ kaldırır;
-        # GitHub runner'da Docker mevcut, ek service container gerekmez.
+        # integration tests spin up real Postgres/RabbitMQ via Testcontainers;
+        # Docker is available on the GitHub runner, no extra service containers needed.
 
   # ──────────────────────────────────────────────────────────────
-  # FastAPI servisleri (StepUp deseni) — Faz 4+ ile eklenince aç.
-  # Bu blok StepUp'ın gerçek ci.yml'inden uyarlandı:
+  # FastAPI services (StepUp pattern) — enable once added in Phase 4+.
+  # This block is adapted from StepUp's actual ci.yml:
   # postgres service container + ruff + alembic upgrade + pytest.
   # ──────────────────────────────────────────────────────────────
   # fastapi-services:
@@ -80,7 +80,7 @@ jobs:
   #       run: python -m pytest --tb=short -q
 
   # ──────────────────────────────────────────────────────────────
-  # Frontend (StepUp deseni, pnpm) — Faz 10 ile eklenince aç.
+  # Frontend (StepUp pattern, pnpm) — enable once added in Phase 10.
   # ──────────────────────────────────────────────────────────────
   # frontend:
   #   runs-on: ubuntu-latest

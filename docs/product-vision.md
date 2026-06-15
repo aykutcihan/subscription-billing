@@ -1,92 +1,105 @@
 # Product Vision — Cadence
 
-> Çalışma adı: **Cadence** (recurring = cadence). İstediğin gibi değiştir.
-> Tekrarlayan gelire sahip işletmeler için üye, abonelik ve faturalandırma platformu.
+> Working name: **Cadence** (recurring = cadence). Change it if you like.
+> A membership, subscription, and billing platform for businesses with recurring revenue.
 
 ---
 
-## Tek cümlelik vizyon
+## One-sentence vision
 
-Tekrarlayan gelire sahip işletmelerin **üyelik, abonelik ve faturalandırma** süreçlerini — çift tahsilat ve kayıp olmadan — güvenilir biçimde otomatikleştiren bir platform.
+A platform that reliably automates **membership, subscription, and billing**
+processes for businesses with recurring revenue — without double charges or
+lost events.
 
 ---
 
 ## Problem
 
-Tekrarlayan ödeme alan işletmeler (spor salonu, SaaS, dernek, online kurs, abonelik kutusu…) şu yükle boğuşur:
+Businesses that take recurring payments (gyms, SaaS, associations, online
+courses, subscription boxes…) struggle with:
 
-- Her dönem **manuel fatura kesme ve tahsilat**
-- **Başarısız ödemeleri** kovalama (kart limiti, süresi dolmuş kart…)
-- **Üyelik durumunu** elle yönetme (aktif mi, borçlu mu, iptal mi?)
-- Fatura/makbuz gönderimi
-- Gelirin ve riskli üyelerin takibi
+- **Manually issuing invoices and collecting payment** every period
+- Chasing **failed payments** (card limits, expired cards…)
+- Manually managing **membership status** (active, past due, cancelled?)
+- Sending invoices/receipts
+- Tracking revenue and at-risk members
 
-Bunu kendileri kurmaya kalkınca iki şey pahalıya patlar: **zaman** ve **hata** — özellikle çift tahsilat (müşteri güveni gider) ve kaçan kayıt (gelir kaybı).
+Doing this themselves is expensive in two ways: **time** and **errors** —
+especially double charges (which destroy customer trust) and missed billing
+(lost revenue).
 
 ---
 
-## Hedef kullanıcılar
+## Target users
 
-| Kullanıcı | Ne yapar |
+| User | What they do |
 |---|---|
-| **İşletme yöneticisi (admin)** | Planları ve üyeleri yönetir; gelir/metrik dashboard'unu izler; başarısız ödemeleri ve riskli üyeleri görür |
-| **Üye / müşteri** | Abone olur, planını değiştirir/iptal eder, faturalarını görüntüler ve indirir |
+| **Business admin** | Manages plans and members; monitors the revenue/metrics dashboard; sees failed payments and at-risk members |
+| **Member / customer** | Subscribes, changes/cancels their plan, views and downloads their invoices |
 
 ---
 
-## Değer önerisi
+## Value proposition
 
-- **Otomatik tekrarlayan faturalandırma** — her dönem, manuel uğraş yok
-- **Güvenilirlik** — çift tahsilat yok (idempotency), kaçan olay yok (outbox)
-- **Başarısız ödeme yönetimi** — otomatik retry + dunning
-- **Otomatik fatura** — PDF üretimi + e-posta bildirimi
-- **Net üyelik yaşam döngüsü** — `active → past_due → cancelled → expired`
-- **Gerçek zamanlı görünürlük** — gelir, aktif üye, başarısız ödeme, yaklaşan yenileme
-
----
-
-## MVP — kapsamdaki temel akışlar
-
-1. Üye kaydı + plan seçimi
-2. Dönemsel **otomatik faturalandırma**
-3. **Ödeme işleme** (idempotent — aynı tahsilat iki kez olmaz)
-4. **Başarısız ödeme** retry + dunning
-5. **Fatura PDF** üretimi + e-posta gönderimi
-6. **Admin dashboard** (gelir, aktif üye, başarısız ödeme, yaklaşan yenileme)
-7. Üyelik **iptal / yenileme**
+- **Automatic recurring billing** — every period, no manual effort
+- **Reliability** — no double charges (idempotency), no lost events (outbox)
+- **Failed payment handling** — automatic retry + dunning
+- **Automatic invoicing** — PDF generation + email notification
+- **Clear membership lifecycle** — `active → past_due → cancelled → expired`
+- **Real-time visibility** — revenue, active members, failed payments, upcoming renewals
 
 ---
 
-## Kapsam DIŞI (non-goals — YAGNI)
+## MVP — core flows in scope
 
-Bilerek dışarıda bıraktıklarımız (sonra eklenebilir, ama MVP için gereksiz karmaşıklık):
-
-- Gerçek ödeme sağlayıcısı entegrasyonu — başta **mock**; istenirse Stripe test mode
-- Çoklu para birimi, vergi/muhasebe entegrasyonu
-- Çok kiracılı (multi-tenant) mimari
-- Mobil uygulama
-- Karmaşık fiyatlandırma (usage-based, tiered) — başta **sabit planlar**
-- Kupon/indirim/deneme süresi — MVP sonrası
-
----
-
-## Başarı kıstasları
-
-Ürün başarılı sayılır eğer:
-
-1. Bir üye dönem sonunda **otomatik, tek seferde** faturalanıp tahsil ediliyorsa
-2. Sistem çökse bile fatura/tahsilat olayı **ne kayboluyor ne tekrarlanıyor**
-3. Admin, gelir ve riskli (past_due) üyeleri **tek ekranda** görebiliyorsa
-4. Üye kendi faturalarına ve abonelik durumuna **kendi kendine** ulaşabiliyorsa
+1. Member registration + plan selection
+2. Periodic **automatic billing**
+3. **Payment processing** (idempotent — the same charge never happens twice)
+4. **Failed payment** retry + dunning
+5. **Invoice PDF** generation + email delivery
+6. **Admin dashboard** (revenue, active members, failed payments, upcoming renewals)
+7. Membership **cancellation / renewal**
 
 ---
 
-## İmza teknik zorluk (bu ürünü "neden mikroservis" yapan şey)
+## Out of scope (non-goals — YAGNI)
 
-Ürünün kalbi **recurring + idempotency**: dönemsel faturalandırmanın güvenilir çalışması, çift tahsilatın önlenmesi ve olayların kaybolmaması. Bu gereksinimler doğrudan şu teknik desenleri zorunlu kılar: idempotency key, outbox pattern, idempotent consumer, dead-letter retry. Ürün hikayesi ile teknik öğrenme hedefi burada örtüşüyor.
+Deliberately left out (can be added later, but unnecessary complexity for the MVP):
+
+- Real payment provider integration — **mock** initially; Stripe test mode if desired
+- Multi-currency, tax/accounting integration
+- Multi-tenant architecture
+- Mobile app
+- Complex pricing (usage-based, tiered) — **fixed plans** initially
+- Coupons/discounts/trial periods — post-MVP
 
 ---
 
-## Not
+## Success criteria
 
-Bu, gerçek bir ürün gibi tasarlanmış bir **portföy/öğrenme projesidir**: mikroservis mimarisini, event-driven iletişimi, idempotency'yi ve dağıtık sistem pattern'lerini **gerçekçi bir ürün bağlamında** göstermek için kurulmuştur. Domain (faturalandırma) bilinçli seçildi — çünkü "neden mikroservis, neden idempotency" sorusuna en doğal cevabı veren alan bu.
+The product is considered successful if:
+
+1. A member is billed and charged **automatically, exactly once** at the end of each period
+2. Even if the system crashes, billing/payment events are **neither lost nor duplicated**
+3. The admin can see revenue and at-risk (past_due) members **on a single screen**
+4. A member can access their own invoices and subscription status **self-service**
+
+---
+
+## Signature technical challenge (what makes this "why microservices")
+
+The heart of the product is **recurring + idempotency**: reliable periodic
+billing, preventing double charges, and ensuring events are never lost. These
+requirements directly mandate the following technical patterns: idempotency
+key, outbox pattern, idempotent consumer, dead-letter retry. The product
+story and the technical learning goal converge here.
+
+---
+
+## Note
+
+This is a **portfolio/learning project** designed like a real product: built
+to demonstrate microservice architecture, event-driven communication,
+idempotency, and distributed-systems patterns **in a realistic product
+context**. The domain (billing) was chosen deliberately — it's the domain
+that most naturally answers "why microservices, why idempotency".
