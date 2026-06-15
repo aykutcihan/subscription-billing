@@ -2,6 +2,7 @@ package com.cadence.auth.api;
 
 import com.cadence.auth.dto.request.LoginRequest;
 import com.cadence.auth.dto.request.RegisterRequest;
+import com.cadence.auth.dto.response.ApiResult;
 import com.cadence.auth.dto.response.AuthResponse;
 import com.cadence.auth.dto.response.UserResponse;
 import com.cadence.auth.service.AuthService;
@@ -22,12 +23,15 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
+    public ResponseEntity<ApiResult<UserResponse>> register(@Valid @RequestBody RegisterRequest request) {
+        UserResponse created = authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResult.success(created, "User registered successfully", HttpStatus.CREATED.value()));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<ApiResult<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse auth = authService.login(request);
+        return ResponseEntity.ok(ApiResult.success(auth, "Login successful", HttpStatus.OK.value()));
     }
 }

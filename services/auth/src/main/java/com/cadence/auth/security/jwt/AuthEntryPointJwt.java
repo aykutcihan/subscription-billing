@@ -1,6 +1,6 @@
 package com.cadence.auth.security.jwt;
 
-import com.cadence.auth.dto.response.ErrorResponse;
+import com.cadence.auth.dto.response.ApiResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,8 +32,7 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        ErrorResponse body = ErrorResponse.of(
-                HttpStatus.UNAUTHORIZED.value(), "Unauthorized", "Authentication is required", request.getRequestURI());
+        ApiResult<Void> body = ApiResult.error("Authentication is required", HttpStatus.UNAUTHORIZED.value());
         objectMapper.writeValue(response.getOutputStream(), body);
     }
 }
