@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # Spring servisleri (SMS deseni). Şu an sadece auth var.
+  # Servis ekledikçe matrix'i büyüt: [auth, subscription, billing, payment, gateway]
+  spring-services:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [auth]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: maven
+
+      - name: Build & test ${{ matrix.service }}
+        working-directory: services/${{ matrix.service }}
+        run: ./mvnw -B verify
+        # integration testleri Testcontainers ile gerçek Postgres/RabbitMQ kaldırır;
+        # GitHub runner'da Docker mevcut, ek service container gerekmez.
+
+  # ──────────────────────────────────────────────────────────────
+  # FastAPI servisleri (StepUp deseni) — Faz 4+ ile eklenince aç.
+  # Bu blok StepUp'ın gerçek ci.yml'inden uyarlandı:
+  # postgres service container + ruff + alembic upgrade + pytest.
+  # ──────────────────────────────────────────────────────────────
+  # fastapi-services:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       service: [notification, document, audit]
+  #   services:
+  #     postgres:
+  #       image: postgres:16
+  #       env:
+  #         POSTGRES_USER: cadence
+  #         POSTGRES_PASSWORD: cadence
+  #         POSTGRES_DB: test_db
+  #       ports:
+  #         - 5432:5432
+  #       options: >-
+  #         --health-cmd pg_isready
+  #         --health-interval 10s
+  #         --health-timeout 5s
+  #         --health-retries 5
+  #   env:
+  #     DATABASE_URL: postgresql+asyncpg://cadence:cadence@localhost:5432/test_db
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.12"
+  #     - name: Install dependencies
+  #       working-directory: services/${{ matrix.service }}
+  #       run: |
+  #         pip install --upgrade pip
+  #         pip install -r requirements.txt ruff
+  #     - name: Lint (ruff)
+  #       working-directory: services/${{ matrix.service }}
+  #       run: ruff check .
+  #     - name: Run migrations
+  #       working-directory: services/${{ matrix.service }}
+  #       run: python -m alembic upgrade head
+  #     - name: Run tests
+  #       working-directory: services/${{ matrix.service }}
+  #       run: python -m pytest --tb=short -q
+
+  # ──────────────────────────────────────────────────────────────
+  # Frontend (StepUp deseni, pnpm) — Faz 10 ile eklenince aç.
+  # ──────────────────────────────────────────────────────────────
+  # frontend:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20"
+  #     - uses: pnpm/action-setup@v3
+  #     - working-directory: frontend
+  #       run: pnpm install --frozen-lockfile
+  #     - working-directory: frontend
+  #       run: pnpm lint && pnpm test
