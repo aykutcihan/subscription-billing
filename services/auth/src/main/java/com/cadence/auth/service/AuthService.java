@@ -2,6 +2,7 @@ package com.cadence.auth.service;
 
 import com.cadence.auth.domain.Role;
 import com.cadence.auth.domain.User;
+import com.cadence.auth.dto.mappers.UserMapper;
 import com.cadence.auth.dto.request.LoginRequest;
 import com.cadence.auth.dto.request.RegisterRequest;
 import com.cadence.auth.dto.response.AuthResponse;
@@ -27,6 +28,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
+    private final UserMapper userMapper;
 
     @Transactional
     public UserResponse register(RegisterRequest request) {
@@ -37,14 +39,10 @@ public class AuthService {
             throw new EmailAlreadyExistsException(request.email());
         }
 
-        User user = User.builder()
-                .username(request.username())
-                .email(request.email())
-                .passwordHash(passwordEncoder.encode(request.password()))
-                .role(Role.MEMBER)
-                .build();
+        User user = userMapper.mapRegisterRequestToUser(
+                request, passwordEncoder.encode(request.password()), Role.MEMBER);
 
-        return UserResponse.from(userRepository.save(user));
+        return userMapper.mapUserToUserResponse(userRepository.save(user));
     }
 
     public AuthResponse login(LoginRequest request) {
