@@ -68,6 +68,9 @@ Unit tests only (no Docker):
 
 | Test | Scenario |
 |---|---|
-| `registerThenLoginReturnsJwt` | Register a user → login → assert JWT is returned |
+| `registerThenLoginReturnsJwt` | Register a user → login → assert JWT access token is returned |
 | `registerWithDuplicateUsernameReturnsConflict` | Duplicate username → 409 Conflict |
 | `loginWithWrongPasswordReturnsUnauthorized` | Wrong password → 401 Unauthorized |
+| `loginReturnsRefreshToken` | Login → assert opaque refresh token is present in response |
+| `refreshWithValidTokenReturnsNewAccessToken` | Login → refresh → assert new access token differs from original |
+| `logoutThenRefreshReturns401` | Login → logout → use stale refresh token → 401 Unauthorized |

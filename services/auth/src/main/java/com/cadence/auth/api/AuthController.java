@@ -1,6 +1,7 @@
 package com.cadence.auth.api;
 
 import com.cadence.auth.dto.request.LoginRequest;
+import com.cadence.auth.dto.request.RefreshRequest;
 import com.cadence.auth.dto.request.RegisterRequest;
 import com.cadence.auth.dto.response.ApiResult;
 import com.cadence.auth.dto.response.AuthResponse;
@@ -33,5 +34,17 @@ public class AuthController {
     public ResponseEntity<ApiResult<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse auth = authService.login(request);
         return ResponseEntity.ok(ApiResult.success(auth, "Login successful"));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResult<AuthResponse>> refresh(@Valid @RequestBody RefreshRequest request) {
+        AuthResponse auth = authService.refreshAndIssue(request.refreshToken());
+        return ResponseEntity.ok(ApiResult.success(auth, "Token refreshed successfully"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResult<Void>> logout(@Valid @RequestBody RefreshRequest request) {
+        authService.logout(request.refreshToken());
+        return ResponseEntity.ok(ApiResult.<Void>builder().message("Logged out successfully").build());
     }
 }
