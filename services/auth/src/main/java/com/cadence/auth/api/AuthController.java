@@ -26,12 +26,12 @@ public class AuthController {
     public ResponseEntity<ApiResult<UserResponse>> register(@Valid @RequestBody RegisterRequest request) {
         UserResponse created = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResult.success(created, "User registered successfully", HttpStatus.CREATED.value()));
+                .body(ApiResult.success(created, "User registered successfully"));
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResult<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse auth = authService.login(request);
-        return ResponseEntity.ok(ApiResult.success(auth, "Login successful", HttpStatus.OK.value()));
+        return ResponseEntity.ok(ApiResult.success(auth, "Login successful"));
     }
 }

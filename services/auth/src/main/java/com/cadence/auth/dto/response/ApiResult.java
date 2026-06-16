@@ -15,13 +15,12 @@ public class ApiResult<T> {
 
     private T data;
     private String message;
-    private int status;
 
-    public static <T> ApiResult<T> success(T data, String message, int status) {
-        return ApiResult.<T>builder().data(data).message(message).status(status).build();
+    public static <T> ApiResult<T> success(T data, String message) {
+        return ApiResult.<T>builder().data(data).message(message).build();
     }
 
-    public static ApiResult<Void> error(String message, int status) {
-        return ApiResult.<Void>builder().message(message).status(status).build();
+    public static ApiResult<Void> error(String message) {
+        return ApiResult.<Void>builder().message(message).build();
     }
 }

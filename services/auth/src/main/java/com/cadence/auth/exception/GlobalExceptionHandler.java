@@ -16,13 +16,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({UsernameAlreadyExistsException.class, EmailAlreadyExistsException.class})
     public ResponseEntity<ApiResult<Void>> handleConflict(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResult.error(ex.getMessage(), HttpStatus.CONFLICT.value()));
+                .body(ApiResult.error(ex.getMessage()));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResult<Void>> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResult.error("Invalid username or password", HttpStatus.UNAUTHORIZED.value()));
+                .body(ApiResult.error("Invalid username or password"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -35,7 +35,6 @@ public class GlobalExceptionHandler {
                 .body(ApiResult.<Map<String, String>>builder()
                         .data(errors)
                         .message("Validation failed")
-                        .status(HttpStatus.BAD_REQUEST.value())
                         .build());
     }
 }

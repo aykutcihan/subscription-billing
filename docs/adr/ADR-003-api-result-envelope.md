@@ -24,20 +24,20 @@ envelope:
 public class ApiResult<T> {
     private T data;
     private String message;
-    private int status;
 }
 ```
 
-- Success: `ApiResult.success(data, message, httpStatus)` — `data` holds the
-  payload (`UserResponse`, `AuthResponse`, ...).
-- Error: `ApiResult.error(message, httpStatus)` — `data` is `null` and
-  omitted from the JSON (`@JsonInclude(NON_NULL)`).
+- Success: `ApiResult.success(data, message)` — `data` holds the payload
+  (`UserResponse`, `AuthResponse`, ...).
+- Error: `ApiResult.error(message)` — `data` is `null` and omitted from the
+  JSON (`@JsonInclude(NON_NULL)`).
 - Validation errors use the same envelope with `data` holding a
   field-name → message map.
 
-HTTP status codes are unchanged (201 for register, 200 for login, 409 for
-conflicts, 401 for bad credentials, 400 for validation errors) — only the
-response body shape is unified.
+HTTP status codes are managed exclusively by `ResponseEntity` (201 for
+register, 200 for login, 409 for conflicts, 401 for bad credentials, 400 for
+validation errors). The body never duplicates the status — only the response
+shape is unified.
 
 This is a **project-wide convention**: every service and endpoint added from
 now on returns `ApiResult<T>`.
