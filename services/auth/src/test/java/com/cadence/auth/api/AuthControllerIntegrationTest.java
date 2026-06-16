@@ -7,6 +7,7 @@ import com.cadence.auth.dto.request.RegisterRequest;
 import com.cadence.auth.dto.response.ApiResult;
 import com.cadence.auth.dto.response.AuthResponse;
 import com.cadence.auth.dto.response.UserResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -31,6 +33,16 @@ class AuthControllerIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @BeforeEach
+    void setUp() {
+        // JDK 21 HttpURLConnection throws HttpRetryException on 401 when outputStreaming=true
+        // (setFixedLengthStreamingMode is called, making streaming() return true).
+        // Disabling outputStreaming prevents setFixedLengthStreamingMode and lets 401 pass through.
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setOutputStreaming(false);
+        restTemplate.getRestTemplate().setRequestFactory(factory);
+    }
 
     @Test
     void registerThenLoginReturnsJwt() {
