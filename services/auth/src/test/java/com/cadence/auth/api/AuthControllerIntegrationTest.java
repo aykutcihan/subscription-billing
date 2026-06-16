@@ -7,6 +7,7 @@ import com.cadence.auth.dto.request.RegisterRequest;
 import com.cadence.auth.dto.response.ApiResult;
 import com.cadence.auth.dto.response.AuthResponse;
 import com.cadence.auth.dto.response.UserResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -36,12 +37,10 @@ class AuthControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // JDK 21 HttpURLConnection throws HttpRetryException on 401 when outputStreaming=true
-        // (setFixedLengthStreamingMode is called, making streaming() return true).
-        // Disabling outputStreaming prevents setFixedLengthStreamingMode and lets 401 pass through.
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setOutputStreaming(false);
-        restTemplate.getRestTemplate().setRequestFactory(factory);
+        // Java's HttpURLConnection throws HttpRetryException on 401 in streaming mode.
+        // Apache HttpClient handles 401 responses without retrying.
+        restTemplate.getRestTemplate().setRequestFactory(
+                new HttpComponentsClientHttpRequestFactory(HttpClients.createDefault()));
     }
 
     @Test
