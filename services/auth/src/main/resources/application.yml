@@ -22,4 +22,5 @@ cadence:
   auth:
     jwt:
       secret: ${JWT_SECRET:cadence-auth-service-dev-jwt-secret-please-override-in-production}
-      expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+      expiration-ms: ${JWT_EXPIRATION_MS:900000}
+      refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}

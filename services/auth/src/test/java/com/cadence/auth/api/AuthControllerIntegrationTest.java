@@ -3,10 +3,13 @@ package com.cadence.auth.api;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.cadence.auth.dto.request.LoginRequest;
+import com.cadence.auth.dto.request.RefreshRequest;
 import com.cadence.auth.dto.request.RegisterRequest;
 import com.cadence.auth.dto.response.ApiResult;
 import com.cadence.auth.dto.response.AuthResponse;
 import com.cadence.auth.dto.response.UserResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +20,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -31,6 +35,14 @@ class AuthControllerIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @BeforeEach
+    void setUp() {
+        // Java's HttpURLConnection throws HttpRetryException on 401 in streaming mode.
+        // Apache HttpClient handles 401 responses without retrying.
+        restTemplate.getRestTemplate().setRequestFactory(
+                new HttpComponentsClientHttpRequestFactory(HttpClients.createDefault()));
+    }
 
     @Test
     void registerThenLoginReturnsJwt() {
@@ -88,5 +100,71 @@ class AuthControllerIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getMessage()).isEqualTo("Invalid username or password");
+    }
+
+    @Test
+    void loginReturnsRefreshToken() {
+        RegisterRequest registerRequest = new RegisterRequest("dave", "dave@example.com", "password123");
+        restTemplate.exchange("/auth/register", HttpMethod.POST, new HttpEntity<>(registerRequest),
+                new ParameterizedTypeReference<ApiResult<UserResponse>>() {});
+
+        LoginRequest loginRequest = new LoginRequest("dave", "password123");
+        ResponseEntity<ApiResult<AuthResponse>> loginResponse = restTemplate.exchange(
+                "/auth/login", HttpMethod.POST, new HttpEntity<>(loginRequest),
+                new ParameterizedTypeReference<ApiResult<AuthResponse>>() {});
+
+        assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(loginResponse.getBody()).isNotNull();
+        assertThat(loginResponse.getBody().getData().token()).isNotBlank();
+        assertThat(loginResponse.getBody().getData().refreshToken()).isNotBlank();
+    }
+
+    @Test
+    void refreshWithValidTokenReturnsNewAccessToken() {
+        RegisterRequest registerRequest = new RegisterRequest("eve", "eve@example.com", "password123");
+        restTemplate.exchange("/auth/register", HttpMethod.POST, new HttpEntity<>(registerRequest),
+                new ParameterizedTypeReference<ApiResult<UserResponse>>() {});
+
+        LoginRequest loginRequest = new LoginRequest("eve", "password123");
+        ResponseEntity<ApiResult<AuthResponse>> loginResponse = restTemplate.exchange(
+                "/auth/login", HttpMethod.POST, new HttpEntity<>(loginRequest),
+                new ParameterizedTypeReference<ApiResult<AuthResponse>>() {});
+
+        String oldAccessToken = loginResponse.getBody().getData().token();
+        String refreshToken = loginResponse.getBody().getData().refreshToken();
+
+        ResponseEntity<ApiResult<AuthResponse>> refreshResponse = restTemplate.exchange(
+                "/auth/refresh", HttpMethod.POST, new HttpEntity<>(new RefreshRequest(refreshToken)),
+                new ParameterizedTypeReference<ApiResult<AuthResponse>>() {});
+
+        assertThat(refreshResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(refreshResponse.getBody()).isNotNull();
+        assertThat(refreshResponse.getBody().getData().token()).isNotBlank();
+        assertThat(refreshResponse.getBody().getData().refreshToken()).isNotBlank();
+        assertThat(refreshResponse.getBody().getData().token()).isNotEqualTo(oldAccessToken);
+        assertThat(refreshResponse.getBody().getData().refreshToken()).isNotEqualTo(refreshToken);
+    }
+
+    @Test
+    void logoutThenRefreshReturns401() {
+        RegisterRequest registerRequest = new RegisterRequest("frank", "frank@example.com", "password123");
+        restTemplate.exchange("/auth/register", HttpMethod.POST, new HttpEntity<>(registerRequest),
+                new ParameterizedTypeReference<ApiResult<UserResponse>>() {});
+
+        LoginRequest loginRequest = new LoginRequest("frank", "password123");
+        ResponseEntity<ApiResult<AuthResponse>> loginResponse = restTemplate.exchange(
+                "/auth/login", HttpMethod.POST, new HttpEntity<>(loginRequest),
+                new ParameterizedTypeReference<ApiResult<AuthResponse>>() {});
+
+        String refreshToken = loginResponse.getBody().getData().refreshToken();
+
+        restTemplate.exchange("/auth/logout", HttpMethod.POST, new HttpEntity<>(new RefreshRequest(refreshToken)),
+                new ParameterizedTypeReference<ApiResult<Void>>() {});
+
+        ResponseEntity<ApiResult<Void>> staleRefreshResponse = restTemplate.exchange(
+                "/auth/refresh", HttpMethod.POST, new HttpEntity<>(new RefreshRequest(refreshToken)),
+                new ParameterizedTypeReference<ApiResult<Void>>() {});
+
+        assertThat(staleRefreshResponse.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 }
