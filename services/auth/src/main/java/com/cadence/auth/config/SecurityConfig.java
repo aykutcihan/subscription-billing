@@ -25,7 +25,9 @@ public class SecurityConfig {
 
     private static final String[] AUTH_WHITELIST = {
             "/auth/register",
-            "/auth/login"
+            "/auth/login",
+            "/auth/refresh",
+            "/auth/logout"
     };
 
     private final UserDetailsServiceImpl userDetailsService;
@@ -54,6 +56,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .exceptionHandling(handler -> handler.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth

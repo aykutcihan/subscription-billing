@@ -25,6 +25,12 @@ public class GlobalExceptionHandler {
                 .body(ApiResult.error("Invalid username or password", HttpStatus.UNAUTHORIZED.value()));
     }
 
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ApiResult<Void>> handleInvalidRefresh(InvalidRefreshTokenException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResult.error(ex.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResult<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();

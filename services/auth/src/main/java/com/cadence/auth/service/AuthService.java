@@ -1,5 +1,6 @@
 package com.cadence.auth.service;
 
+import com.cadence.auth.domain.RefreshToken;
 import com.cadence.auth.domain.Role;
 import com.cadence.auth.domain.User;
 import com.cadence.auth.dto.mappers.UserMapper;
@@ -29,6 +30,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final UserMapper userMapper;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public UserResponse register(RegisterRequest request) {
@@ -45,13 +47,34 @@ public class AuthService {
         return userMapper.mapUserToUserResponse(userRepository.save(user));
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password()));
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        String token = jwtUtils.generateToken(userDetails);
+        String accessToken = jwtUtils.generateToken(userDetails);
+        RefreshToken refreshToken = refreshTokenService.create(userDetails.getId());
 
-        return new AuthResponse(token, userDetails.getUsername(), userDetails.getRole());
+        return new AuthResponse(accessToken, refreshToken.getToken(),
+                userDetails.getUsername(), userDetails.getRole());
+    }
+
+    @Transactional
+    public AuthResponse refresh(String refreshTokenValue) {
+        RefreshToken old = refreshTokenService.verifyValid(refreshTokenValue);
+        User user = userRepository.findById(old.getUserId())
+                .orElseThrow(() -> new IllegalStateException("User not found for refresh token"));
+
+        refreshTokenService.deleteByToken(refreshTokenValue);
+        RefreshToken fresh = refreshTokenService.create(user.getId());
+        String newAccess = jwtUtils.generateToken(UserDetailsImpl.fromUser(user));
+
+        return new AuthResponse(newAccess, fresh.getToken(), user.getUsername(), user.getRole());
+    }
+
+    @Transactional
+    public void logout(String refreshTokenValue) {
+        refreshTokenService.deleteByToken(refreshTokenValue);
     }
 }
