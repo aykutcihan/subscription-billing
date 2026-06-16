@@ -1,5 +1,6 @@
 package com.cadence.auth.service;
 
+import com.cadence.auth.domain.RefreshToken;
 import com.cadence.auth.domain.Role;
 import com.cadence.auth.domain.User;
 import com.cadence.auth.dto.mappers.UserMapper;
@@ -8,6 +9,7 @@ import com.cadence.auth.dto.request.RegisterRequest;
 import com.cadence.auth.dto.response.AuthResponse;
 import com.cadence.auth.dto.response.UserResponse;
 import com.cadence.auth.exception.EmailAlreadyExistsException;
+import com.cadence.auth.exception.InvalidRefreshTokenException;
 import com.cadence.auth.exception.UsernameAlreadyExistsException;
 import com.cadence.auth.repository.UserRepository;
 import com.cadence.auth.security.jwt.JwtUtils;
@@ -29,6 +31,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final UserMapper userMapper;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public UserResponse register(RegisterRequest request) {
@@ -45,13 +48,35 @@ public class AuthService {
         return userMapper.mapUserToUserResponse(userRepository.save(user));
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password()));
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        String token = jwtUtils.generateToken(userDetails);
+        String accessToken = jwtUtils.generateToken(userDetails);
+        RefreshToken refreshToken = refreshTokenService.create(userDetails.getId());
 
-        return new AuthResponse(token, userDetails.getUsername(), userDetails.getRole());
+        return new AuthResponse(accessToken, refreshToken.getToken(), userDetails.getUsername(), userDetails.getRole());
+    }
+
+    @Transactional
+    public AuthResponse refreshAndIssue(String tokenValue) {
+        RefreshToken existing = refreshTokenService.verifyValid(tokenValue);
+
+        User user = userRepository.findById(existing.getUserId())
+                .orElseThrow(() -> new InvalidRefreshTokenException("User not found for refresh token"));
+
+        UserDetailsImpl userDetails = UserDetailsImpl.fromUser(user);
+        String newAccessToken = jwtUtils.generateToken(userDetails);
+
+        refreshTokenService.deleteByToken(tokenValue);
+        RefreshToken newRefreshToken = refreshTokenService.create(user.getId());
+
+        return new AuthResponse(newAccessToken, newRefreshToken.getToken(), user.getUsername(), user.getRole());
+    }
+
+    public void logout(String tokenValue) {
+        refreshTokenService.deleteByToken(tokenValue);
     }
 }

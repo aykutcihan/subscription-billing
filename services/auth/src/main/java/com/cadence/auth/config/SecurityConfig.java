@@ -25,7 +25,9 @@ public class SecurityConfig {
 
     private static final String[] AUTH_WHITELIST = {
             "/auth/register",
-            "/auth/login"
+            "/auth/login",
+            "/auth/refresh",
+            "/auth/logout"
     };
 
     private final UserDetailsServiceImpl userDetailsService;
