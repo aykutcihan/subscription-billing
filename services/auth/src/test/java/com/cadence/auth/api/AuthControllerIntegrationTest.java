@@ -7,6 +7,8 @@ import com.cadence.auth.dto.request.RegisterRequest;
 import com.cadence.auth.dto.response.ApiResult;
 import com.cadence.auth.dto.response.AuthResponse;
 import com.cadence.auth.dto.response.UserResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +19,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -31,6 +34,14 @@ class AuthControllerIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @BeforeEach
+    void setUp() {
+        // Java's HttpURLConnection throws HttpRetryException on 401 in streaming mode.
+        // Apache HttpClient handles 401 responses without retrying.
+        restTemplate.getRestTemplate().setRequestFactory(
+                new HttpComponentsClientHttpRequestFactory(HttpClients.createDefault()));
+    }
 
     @Test
     void registerThenLoginReturnsJwt() {
