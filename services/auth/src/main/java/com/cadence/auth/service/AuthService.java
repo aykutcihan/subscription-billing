@@ -11,6 +11,7 @@ import com.cadence.auth.dto.response.UserResponse;
 import com.cadence.auth.exception.EmailAlreadyExistsException;
 import com.cadence.auth.exception.InvalidRefreshTokenException;
 import com.cadence.auth.exception.UsernameAlreadyExistsException;
+import com.cadence.auth.util.Messages;
 import com.cadence.auth.repository.UserRepository;
 import com.cadence.auth.security.jwt.JwtUtils;
 import com.cadence.auth.security.service.UserDetailsImpl;
@@ -65,7 +66,7 @@ public class AuthService {
         RefreshToken existing = refreshTokenService.verifyValid(tokenValue);
 
         User user = userRepository.findById(existing.getUserId())
-                .orElseThrow(() -> new InvalidRefreshTokenException("User not found for refresh token"));
+                .orElseThrow(() -> new InvalidRefreshTokenException(Messages.USER_NOT_FOUND_FOR_REFRESH));
 
         UserDetailsImpl userDetails = UserDetailsImpl.fromUser(user);
         String newAccessToken = jwtUtils.generateToken(userDetails);

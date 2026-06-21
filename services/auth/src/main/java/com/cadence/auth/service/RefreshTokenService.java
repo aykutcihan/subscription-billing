@@ -3,6 +3,7 @@ package com.cadence.auth.service;
 import com.cadence.auth.domain.RefreshToken;
 import com.cadence.auth.exception.InvalidRefreshTokenException;
 import com.cadence.auth.repository.RefreshTokenRepository;
+import com.cadence.auth.util.Messages;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +30,10 @@ public class RefreshTokenService {
 
     public RefreshToken verifyValid(String tokenValue) {
         RefreshToken token = refreshTokenRepository.findByToken(tokenValue)
-                .orElseThrow(() -> new InvalidRefreshTokenException("Refresh token not found"));
+                .orElseThrow(() -> new InvalidRefreshTokenException(Messages.REFRESH_TOKEN_NOT_FOUND));
         if (token.getExpiryDate().isBefore(Instant.now())) {
             refreshTokenRepository.delete(token);
-            throw new InvalidRefreshTokenException("Refresh token expired");
+            throw new InvalidRefreshTokenException(Messages.REFRESH_TOKEN_EXPIRED);
         }
         return token;
     }
