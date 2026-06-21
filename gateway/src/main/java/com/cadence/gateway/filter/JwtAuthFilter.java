@@ -51,7 +51,12 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
-        return chain.filter(exchange);
+        Long userId = jwtUtils.getUserId(token);
+        ServerWebExchange mutatedExchange = exchange.mutate()
+                .request(r -> r.header("X-User-Id", String.valueOf(userId)))
+                .build();
+
+        return chain.filter(mutatedExchange);
     }
 
     @Override
