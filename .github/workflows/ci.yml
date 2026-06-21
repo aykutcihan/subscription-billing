@@ -45,9 +45,9 @@ jobs:
           distribution: temurin
           cache: maven
 
-      - name: Build gateway
+      - name: Build & test gateway
         working-directory: gateway
-        run: ./mvnw -B package -DskipTests
+        run: ./mvnw -B verify
 
   # ──────────────────────────────────────────────────────────────
   # FastAPI services (StepUp pattern) — enable once added in Phase 4+.
