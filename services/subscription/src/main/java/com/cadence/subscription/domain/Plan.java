@@ -19,7 +19,7 @@ public class Plan {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "billing_cycle", nullable = false)
+    @Column(nullable = false)
     private BillingCycle billingCycle;
 
     @Column(nullable = false, precision = 10, scale = 2)
