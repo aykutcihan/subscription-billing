@@ -8,7 +8,7 @@ on:
 
 jobs:
   # Spring services (SMS pattern). Currently only auth exists.
-  # Grow the matrix as services are added: [auth, subscription, billing, payment, gateway]
+  # Grow the matrix as services are added: [auth, subscription, billing, payment]
   spring-services:
     runs-on: ubuntu-latest
     strategy:
@@ -30,6 +30,24 @@ jobs:
         run: ./mvnw -B verify
         # integration tests spin up real Postgres/RabbitMQ via Testcontainers;
         # Docker is available on the GitHub runner, no extra service containers needed.
+
+  # Gateway lives at ./gateway (not under services/) so it has its own job.
+  gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: maven
+
+      - name: Build & test gateway
+        working-directory: gateway
+        run: ./mvnw -B verify
 
   # ──────────────────────────────────────────────────────────────
   # FastAPI services (StepUp pattern) — enable once added in Phase 4+.

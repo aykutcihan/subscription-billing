@@ -1,6 +1,8 @@
 name: subscription-billing
 
 services:
+
+  # ── POSTGRES ─────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     container_name: sb-postgres
@@ -18,6 +20,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── RABBITMQ ─────────────────────────────────────────────
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: sb-rabbitmq
@@ -35,6 +38,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── REDIS ─────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: sb-redis
@@ -48,6 +52,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── AUTH ──────────────────────────────────────────────────
   auth:
     build:
       context: ./services/auth
@@ -64,6 +69,19 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  # ── GATEWAY ───────────────────────────────────────────────
+  gateway:
+    build:
+      context: ./gateway
+    container_name: sb-gateway
+    environment:
+      AUTH_SERVICE_URL: http://auth:8081
+      JWT_SECRET: ${JWT_SECRET:-cadence-auth-service-dev-jwt-secret-please-override-in-production}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth
 
 volumes:
   postgres_data:
