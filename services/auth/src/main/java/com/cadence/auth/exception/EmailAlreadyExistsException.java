@@ -1,6 +1,6 @@
 package com.cadence.auth.exception;
 
-import com.cadence.auth.util.Messages;
+import com.cadence.auth.exception.message.Messages;
 
 public class EmailAlreadyExistsException extends RuntimeException {
 

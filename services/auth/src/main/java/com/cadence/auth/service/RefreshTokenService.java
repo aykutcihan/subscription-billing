@@ -3,7 +3,7 @@ package com.cadence.auth.service;
 import com.cadence.auth.domain.RefreshToken;
 import com.cadence.auth.exception.InvalidRefreshTokenException;
 import com.cadence.auth.repository.RefreshTokenRepository;
-import com.cadence.auth.util.Messages;
+import com.cadence.auth.exception.message.Messages;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

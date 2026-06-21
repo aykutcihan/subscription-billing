@@ -11,7 +11,7 @@ import com.cadence.auth.dto.response.UserResponse;
 import com.cadence.auth.exception.EmailAlreadyExistsException;
 import com.cadence.auth.exception.InvalidRefreshTokenException;
 import com.cadence.auth.exception.UsernameAlreadyExistsException;
-import com.cadence.auth.util.Messages;
+import com.cadence.auth.exception.message.Messages;
 import com.cadence.auth.repository.UserRepository;
 import com.cadence.auth.security.jwt.JwtUtils;
 import com.cadence.auth.security.service.UserDetailsImpl;

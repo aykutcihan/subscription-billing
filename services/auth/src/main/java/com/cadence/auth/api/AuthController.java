@@ -7,7 +7,6 @@ import com.cadence.auth.dto.response.ApiResult;
 import com.cadence.auth.dto.response.AuthResponse;
 import com.cadence.auth.dto.response.UserResponse;
 import com.cadence.auth.service.AuthService;
-import com.cadence.auth.util.Messages;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,24 +27,24 @@ public class AuthController {
     public ResponseEntity<ApiResult<UserResponse>> register(@Valid @RequestBody RegisterRequest request) {
         UserResponse created = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResult.success(created, Messages.USER_REGISTERED));
+                .body(ApiResult.success(created, "User registered successfully"));
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResult<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse auth = authService.login(request);
-        return ResponseEntity.ok(ApiResult.success(auth, Messages.LOGIN_SUCCESS));
+        return ResponseEntity.ok(ApiResult.success(auth, "Login successful"));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResult<AuthResponse>> refresh(@Valid @RequestBody RefreshRequest request) {
         AuthResponse auth = authService.refreshAndIssue(request.refreshToken());
-        return ResponseEntity.ok(ApiResult.success(auth, Messages.TOKEN_REFRESHED));
+        return ResponseEntity.ok(ApiResult.success(auth, "Token refreshed successfully"));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResult<Void>> logout(@Valid @RequestBody RefreshRequest request) {
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshRequest request) {
         authService.logout(request.refreshToken());
-        return ResponseEntity.ok(ApiResult.<Void>builder().message(Messages.LOGOUT_SUCCESS).build());
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,7 +1,7 @@
 package com.cadence.auth.exception;
 
 import com.cadence.auth.dto.response.ApiResult;
-import com.cadence.auth.util.Messages;
+import com.cadence.auth.exception.message.Messages;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
