@@ -135,6 +135,20 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- docker-java defaults to API v1.32; Docker Desktop 4.52+ requires >= 1.40.
+                         DOCKER_HOST bypasses the Docker Desktop proxy (returns 400) and targets
+                         the Linux daemon pipe directly. Ignored on Linux/CI where the unix socket
+                         strategy takes precedence. -->
+                    <argLine>-Dapi.version=1.44</argLine>
+                    <environmentVariables>
+                        <DOCKER_HOST>npipe:////./pipe/docker_engine_linux</DOCKER_HOST>
+                    </environmentVariables>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

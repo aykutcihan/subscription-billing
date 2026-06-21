@@ -49,18 +49,44 @@ safe for all HTTP methods and status codes.
 
 ## Running tests locally
 
-Integration tests require Docker (for Testcontainers):
+Integration tests require Docker (for Testcontainers).
+
+### Linux / macOS
 
 ```bash
 cd services/auth
 ./mvnw verify
 ```
 
-Unit tests only (no Docker):
+### Windows — Docker Desktop 4.52+
 
-```bash
-./mvnw test -Dtest="JwtUtilsTest"
+Docker Desktop 4.52+ routes connections through a proxy that Testcontainers 1.20.x cannot
+negotiate with (docker-java defaults to API version 1.32; the daemon requires ≥ 1.40).
+
+No manual setup needed — the workaround is baked into `pom.xml` and `.vscode/settings.json`.
+
+**Terminal:**
+
+```powershell
+cd services\auth
+.\mvnw.cmd test
 ```
+
+**VS Code:** Use the ▶ button next to the test class or method directly — `.vscode/settings.json`
+passes the required JVM arg and `DOCKER_HOST` automatically via `java.test.config`.
+
+Unit tests only (no Docker needed):
+
+```powershell
+.\mvnw.cmd test -Dtest="JwtUtilsTest"
+```
+
+**How it works under the hood:**
+
+| Config | Location | Purpose |
+|---|---|---|
+| `DOCKER_HOST=npipe:////./pipe/docker_engine_linux` | `pom.xml` Surefire `<environmentVariables>` and `.vscode/settings.json` | Bypasses the Docker Desktop proxy; connects directly to the Linux daemon named pipe |
+| `-Dapi.version=1.44` | `pom.xml` Surefire `<argLine>` and `.vscode/settings.json` `vmArgs` | Overrides docker-java's hardcoded default (1.32) in the forked test JVM |
 
 ---
 
