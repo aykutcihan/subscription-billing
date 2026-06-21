@@ -1,6 +1,8 @@
 package com.cadence.subscription.service;
 
 import com.cadence.subscription.domain.Plan;
+import com.cadence.subscription.dto.mapper.PlanMapper;
+import com.cadence.subscription.dto.response.PlanResponse;
 import com.cadence.subscription.repository.PlanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,9 +15,13 @@ import java.util.List;
 public class PlanService {
 
     private final PlanRepository planRepository;
+    private final PlanMapper planMapper;
 
     @Transactional(readOnly = true)
-    public List<Plan> getAllPlans() {
-        return planRepository.findAll();
+    public List<PlanResponse> getAllPlans() {
+        return planRepository.findAll()
+                .stream()
+                .map(planMapper::mapPlanToPlanResponse)
+                .toList();
     }
 }
