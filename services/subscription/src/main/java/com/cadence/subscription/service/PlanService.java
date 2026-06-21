@@ -1,7 +1,7 @@
 package com.cadence.subscription.service;
 
 import com.cadence.subscription.domain.Plan;
-import com.cadence.subscription.dto.mapper.PlanMapper;
+import com.cadence.subscription.dto.mappers.PlanMapper;
 import com.cadence.subscription.dto.response.PlanResponse;
 import com.cadence.subscription.repository.PlanRepository;
 import lombok.RequiredArgsConstructor;

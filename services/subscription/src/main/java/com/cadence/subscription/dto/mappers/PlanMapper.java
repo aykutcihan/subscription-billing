@@ -1,4 +1,4 @@
-package com.cadence.subscription.dto.mapper;
+package com.cadence.subscription.dto.mappers;
 
 import com.cadence.subscription.domain.Plan;
 import com.cadence.subscription.dto.response.PlanResponse;
