@@ -33,7 +33,7 @@ All authentication is JWT-based and stateless at the API gateway level, with a r
 - `POST /auth/login` → **200 OK** — returns `AuthResponse { token, tokenType, refreshToken, username, role }`.
 - `POST /auth/refresh` → **200 OK** — accepts `{ refreshToken }`, verifies it against DB, rotates it (deletes old, creates new), issues a new access token + new refresh token.
 - `POST /auth/logout` → **204 No Content** — accepts `{ refreshToken }`, deletes the DB record; access token expires on its own.
-- All protected endpoints expect `Authorization: Bearer <access-token>`; `AuthTokenFilter` validates the token and populates `SecurityContextHolder`.
+- All protected endpoints expect `Authorization: Bearer <access-token>`; the **API Gateway** (`JwtAuthFilter`) validates the token before the request reaches any downstream service — no per-service auth round-trip needed. Auth endpoints (`/auth/**`) are whitelisted and bypass this check.
 
 ### Rotation
 
