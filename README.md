@@ -51,33 +51,9 @@ docker compose up -d
 
 Stop everything with `docker compose down` (add `-v` to also drop volumes).
 
-After changing code in a service, rebuild just that service instead of the whole stack:
-
-```bash
-docker compose up -d --build auth
-```
-
-### Windows note
-
-Docker Compose on Windows can fail with `invalid volume specification` for
-bind-mounted paths (e.g. `infra/postgres/init`), because the `C:\...` drive
-letter colon clashes with the volume spec's own `:` separators. Fix: set
-this environment variable once (PowerShell, persists across terminals):
-
-```powershell
-[System.Environment]::SetEnvironmentVariable('COMPOSE_CONVERT_WINDOWS_PATHS', '1', 'User')
-```
-
-Restart your terminal (or VS Code) afterwards for it to take effect.
-
-## API documentation (Swagger)
-
-Each service exposes its own Swagger UI directly on its port (not through the gateway):
-
-| Service      | Swagger UI                                   |
-|--------------|-----------------------------------------------|
-| Auth         | http://localhost:8081/swagger-ui.html         |
-| Subscription | http://localhost:8082/swagger-ui.html         |
+See [`docs/guides/local-development.md`](docs/guides/local-development.md) for
+rebuilding a single service, the Windows Docker Compose volume-path fix, and
+Swagger UI links.
 
 ## Auth endpoints
 
