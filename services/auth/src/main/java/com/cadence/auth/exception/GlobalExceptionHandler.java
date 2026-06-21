@@ -1,6 +1,7 @@
 package com.cadence.auth.exception;
 
 import com.cadence.auth.dto.response.ApiResult;
+import com.cadence.auth.exception.message.Messages;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResult<Void>> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResult.error("Invalid username or password"));
+                .body(ApiResult.error(Messages.INVALID_CREDENTIALS));
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
@@ -40,7 +41,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest()
                 .body(ApiResult.<Map<String, String>>builder()
                         .data(errors)
-                        .message("Validation failed")
+                        .message(Messages.VALIDATION_FAILED)
                         .build());
     }
 }

@@ -159,7 +159,7 @@ class AuthControllerIntegrationTest {
         String refreshToken = loginResponse.getBody().getData().refreshToken();
 
         restTemplate.exchange("/auth/logout", HttpMethod.POST, new HttpEntity<>(new RefreshRequest(refreshToken)),
-                new ParameterizedTypeReference<ApiResult<Void>>() {});
+                Void.class);
 
         ResponseEntity<ApiResult<Void>> staleRefreshResponse = restTemplate.exchange(
                 "/auth/refresh", HttpMethod.POST, new HttpEntity<>(new RefreshRequest(refreshToken)),
