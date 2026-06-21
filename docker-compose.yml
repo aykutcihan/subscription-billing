@@ -65,6 +65,18 @@ services:
       postgres:
         condition: service_healthy
 
+  gateway:
+    build:
+      context: ./gateway
+    container_name: sb-gateway
+    environment:
+      AUTH_SERVICE_URL: http://auth:8081
+      JWT_SECRET: ${JWT_SECRET:-cadence-auth-service-dev-jwt-secret-please-override-in-production}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth
+
 volumes:
   postgres_data:
   rabbitmq_data:
