@@ -27,7 +27,10 @@ public class SecurityConfig {
             "/auth/register",
             "/auth/login",
             "/auth/refresh",
-            "/auth/logout"
+            "/auth/logout",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs/**"
     };
 
     private final UserDetailsServiceImpl userDetailsService;

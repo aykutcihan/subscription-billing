@@ -29,6 +29,7 @@ public class JwtUtils {
                 .id(UUID.randomUUID().toString())
                 .subject(userDetails.getUsername())
                 .claim("role", userDetails.getRole().name())
+                .claim("userId", userDetails.getId())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(signingKey())

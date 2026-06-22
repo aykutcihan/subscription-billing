@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,7 +91,8 @@ class JwtAuthFilterTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer valid-token")
                         .build());
         when(jwtUtils.isValid("valid-token")).thenReturn(true);
-        when(chain.filter(exchange)).thenReturn(Mono.empty());
+        when(jwtUtils.getUserId("valid-token")).thenReturn(42L);
+        when(chain.filter(any())).thenReturn(Mono.empty());
 
         StepVerifier.create(filter.filter(exchange, chain))
                 .verifyComplete();

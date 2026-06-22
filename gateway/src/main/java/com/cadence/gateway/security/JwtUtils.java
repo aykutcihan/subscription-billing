@@ -1,5 +1,6 @@
 package com.cadence.gateway.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -28,5 +29,10 @@ public class JwtUtils {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    public Long getUserId(String token) {
+        Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+        return claims.get("userId", Long.class);
     }
 }
