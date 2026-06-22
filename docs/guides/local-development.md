@@ -59,3 +59,49 @@ send one):
 |--------------|-----------------------------------------------|
 | Auth         | http://localhost:8081/swagger-ui.html         |
 | Subscription | http://localhost:8082/swagger-ui.html         |
+
+## Adding a new service's database after the stack is already running
+
+Postgres only runs the scripts in `infra/postgres/init/` the **first time**
+its volume (`postgres_data`) is created. If you add a new service (with a
+new database) after the volume already exists, the init script for that
+database never runs, and the new service fails on startup with:
+
+```
+Unable to determine Dialect without JDBC metadata
+```
+
+(Postgres rejects the connection because the database doesn't exist yet.)
+
+**Fix:** create the database manually against the running container instead
+of recreating the volume (which would wipe every other service's data):
+
+```bash
+docker compose exec postgres psql -U postgres -c "CREATE DATABASE <new_db_name>;"
+```
+
+Then rebuild/restart the new service.
+
+## springdoc-openapi version must match the Spring Boot version
+
+Each service can be on a different Spring Boot version (Initializr doesn't
+always offer the same version for every module). `springdoc-openapi` is
+compiled against a specific Spring Framework version internally — using a
+mismatched version causes:
+
+```
+java.lang.NoSuchMethodError: 'void org.springframework.web.method.ControllerAdviceBean.<init>(java.lang.Object)'
+```
+
+at runtime when hitting `/v3/api-docs` or `/swagger-ui.html` (it fails with
+a 500, not at startup).
+
+**Compatibility:**
+
+| Spring Boot version | springdoc-openapi version |
+|---|---|
+| 3.2.x / 3.3.x | 2.6.x |
+| 3.4.x / 3.5.x | 2.8.x |
+
+Check the [springdoc-openapi releases page](https://github.com/springdoc/springdoc-openapi/releases)
+when adding a new service to confirm the right pairing.
