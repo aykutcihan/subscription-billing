@@ -75,6 +75,29 @@ services:
       postgres:
         condition: service_healthy
 
+  # ── SUBSCRIPTION ──────────────────────────────────────────
+  subscription:
+    build:
+      context: ./services/subscription
+    container_name: sb-subscription
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: subscription_db
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+    ports:
+      - "${SUBSCRIPTION_SERVICE_PORT:-8082}:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
   # ── GATEWAY ───────────────────────────────────────────────
   gateway:
     build:
@@ -82,11 +105,13 @@ services:
     container_name: sb-gateway
     environment:
       AUTH_SERVICE_URL: http://auth:8081
+      SUBSCRIPTION_SERVICE_URL: http://subscription:8082
       JWT_SECRET: ${JWT_SECRET:-cadence-auth-service-dev-jwt-secret-please-override-in-production}
     ports:
       - "8080:8080"
     depends_on:
       - auth
+      - subscription
 
 volumes:
   postgres_data:
